@@ -1,12 +1,38 @@
 package futurehack.org.foodeye;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.ibm.watson.developer_cloud.alchemy.v1.model.ImageKeywords;
+import com.ibm.watson.developer_cloud.natural_language_classifier.v1.model.Classification;
+import com.ibm.watson.developer_cloud.natural_language_classifier.v1.model.ClassifiedClass;
+import com.ibm.watson.developer_cloud.visual_insights.v1_experimental.model.Classifiers;
+import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.VisualRecognition;
+import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.model.VisualClassification;
+import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.model.VisualClassifier;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -24,6 +50,7 @@ public class FullscreenActivity extends AppCompatActivity {
      * user interaction before hiding the system UI.
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private static final String TAG = FullscreenActivity.class.getCanonicalName();
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -49,7 +76,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
+    //private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -58,7 +85,7 @@ public class FullscreenActivity extends AppCompatActivity {
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
+            //mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -68,20 +95,81 @@ public class FullscreenActivity extends AppCompatActivity {
             hide();
         }
     };
+    private Uri fileUri = null;
+    private File photoFile = null;
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the
      * system UI. This is to prevent the jarring behavior of controls going away
      * while interacting with activity UI.
      */
+    private final Button.OnClickListener mOnClickListener = new Button.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            // Ensure that there's a camera activity to handle the intent
+            photoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "foo.png");
+            photoFile.setWritable(true);
+            fileUri = Uri.fromFile(photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                // Create the File where the photo should go
+                startActivityForResult(takePictureIntent, 100);
+            }
+
+
+        }
+    };
     private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
+                        return true;
         }
     };
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "Request code: " + requestCode + "result code" + resultCode);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            getContentResolver().notifyChange(fileUri, null);
+            Log.d(TAG, "Size: " + photoFile.length());
+            Log.d(TAG, "Path: " + photoFile.getAbsolutePath());
+            if (photoFile != null) {
+                new AsyncTask<File, Void, VisualClassification>() {
+                    @Override
+                    protected VisualClassification doInBackground(File... files) {
+                        Log.d(TAG, files[0].getAbsolutePath());
+                        VisualRecognition service = new VisualRecognition(VisualRecognition.VERSION_DATE_2015_12_02);
+                        service.setEndPoint("https://gateway.watsonplatform.net/visual-recognition-beta/api");
+                        service.setUsernameAndPassword("8a78cc4d-e45c-4b9d-b2e8-3330af647852", "tH5W42KS7TNE");
+                        VisualClassification classification = service.classify(files[0]).execute();
+                        return classification;
+                    }
+
+                    @Override
+                    protected void onPostExecute(VisualClassification classification) {
+                        Log.d(TAG, "POSTEXEC");
+                        String str = "";
+                        for (VisualClassification.Image image: classification.getImages()) {
+                            if (image.getScores() != null) {
+                                for (VisualClassification.Score score : image.getScores()) {
+                                    str += "\r\n" + score.getName() + ":" + score.getScore();
+                                }
+                            } else {
+                                str += " " + image.getImage();
+                            }
+                        }
+                        ((TextView) mContentView).setText(str);
+                    }
+                }.execute(photoFile);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +178,7 @@ public class FullscreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fullscreen);
 
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        //mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
 
@@ -105,7 +193,10 @@ public class FullscreenActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        ((Button)findViewById(R.id.dummy_button)).setOnClickListener(mOnClickListener);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -132,7 +223,7 @@ public class FullscreenActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
+        //mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
@@ -159,5 +250,45 @@ public class FullscreenActivity extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Fullscreen Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://futurehack.org.foodeye/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Fullscreen Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://futurehack.org.foodeye/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }
