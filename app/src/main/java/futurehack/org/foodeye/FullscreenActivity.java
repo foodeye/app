@@ -1,38 +1,42 @@
 package futurehack.org.foodeye;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.ibm.watson.developer_cloud.alchemy.v1.model.ImageKeywords;
-import com.ibm.watson.developer_cloud.natural_language_classifier.v1.model.Classification;
-import com.ibm.watson.developer_cloud.natural_language_classifier.v1.model.ClassifiedClass;
-import com.ibm.watson.developer_cloud.visual_insights.v1_experimental.model.Classifiers;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.VisualRecognition;
 import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.model.VisualClassification;
 import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.model.VisualClassifier;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.GsonConverterFactory;
+import retrofit2.Retrofit;
+import retrofit2.RxJavaCallAdapterFactory;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -97,6 +101,7 @@ public class FullscreenActivity extends AppCompatActivity {
     };
     private Uri fileUri = null;
     private File photoFile = null;
+    private NDBService.NDB mService = null;
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the
      * system UI. This is to prevent the jarring behavior of controls going away
@@ -147,7 +152,10 @@ public class FullscreenActivity extends AppCompatActivity {
                         VisualRecognition service = new VisualRecognition(VisualRecognition.VERSION_DATE_2015_12_02);
                         service.setEndPoint("https://gateway.watsonplatform.net/visual-recognition-beta/api");
                         service.setUsernameAndPassword("8a78cc4d-e45c-4b9d-b2e8-3330af647852", "tH5W42KS7TNE");
-                        VisualClassification classification = service.classify(files[0]).execute();
+                        VisualClassifier apple = new VisualClassifier("apple_1_35961646");
+                        VisualClassifier banana = new VisualClassifier("banana_1872685771");
+                        VisualClassifier mandarin = new VisualClassifier("mandarin_821155878");
+                        VisualClassification classification = service.classify(files[0], apple).execute();
                         return classification;
                     }
 
@@ -164,7 +172,36 @@ public class FullscreenActivity extends AppCompatActivity {
                                 str += " " + image.getImage();
                             }
                         }
-                        ((TextView) mContentView).setText(str);
+                        Log.d(TAG, "String: " + str);
+                        VisualClassification.Image img = classification.getImages().get(0);
+                        if (img.getScores() != null) {
+                            new AsyncTask<String, Void, String>() {
+                                @Override
+                                protected String doInBackground(String... strings) {
+                                    retrofit2.Response<List<NDBService.SearchResult>> res = null;
+                                    try {
+                                        res = mService.search(new NDBService.QueryRequest(strings[0].split("_")[0])).execute();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if (res.body() != null) {
+                                        Log.d(TAG, "ndbo " + res.body().get(0).ndbo);
+                                        return res.body().get(0).name;
+                                    } else {
+                                        return "\r\n\r\nFailed";
+                                    }
+                                }
+
+                                @Override
+                                protected void onPostExecute(String aVoid) {
+                                    super.onPostExecute(aVoid);
+                                    Log.d(TAG, "postexec api: " + aVoid);
+                                    //((TextView) mContentView).setText(aVoid);
+                                }
+                            }.execute(img.getScores().get(0).getName());
+                        }
+                        //TextView view = ((TextView) mContentView);
+                        //view.setText(view.getText() + "\r\n" + str);
                     }
                 }.execute(photoFile);
             }
@@ -176,6 +213,30 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request.Builder ongoing = chain.request().newBuilder();
+                ongoing.addHeader("Accept", "*/*");
+                ongoing.addHeader("Content-Type", "application/json");
+                ongoing.addHeader("Authorization",  "Basic " + Base64.encodeToString("c2pixnqbw459rPnoa7cQTr8Ajv7aq9unfM7gXcWr:".getBytes(), Base64.NO_WRAP)
+                );
+                return chain.proceed(ongoing.build());
+            }
+        });
+        httpClient.addInterceptor(logging);
+        Retrofit.Builder builder = new Retrofit.Builder();
+        builder.baseUrl("https://api.nal.usda.gov/ndb/");
+        builder.client(httpClient.build());
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        builder.addConverterFactory(GsonConverterFactory.create(gson));
+        builder.addCallAdapterFactory(RxJavaCallAdapterFactory.create());
+        Retrofit retrofit = builder.build();
+
+        mService = retrofit.create(NDBService.NDB.class);
 
         mVisible = true;
         //mControlsView = findViewById(R.id.fullscreen_content_controls);
