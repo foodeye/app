@@ -10,18 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9fc01c40-3f57-4015-a637-f9946084892d" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/adapter_rxjava_2_0_0_beta3.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/converter_gson_2_0_0_beta3.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/logging_interceptor_3_2_0.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/retrofit_2_0_0_beta3.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/rxandroid_1_0_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/rxjava_1_1_0.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/NDBService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.iml" afterPath="$PROJECT_DIR$/app/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/build.gradle" afterPath="$PROJECT_DIR$/app/build.gradle" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/FullscreenActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/FullscreenActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_fullscreen.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_fullscreen.xml" />
     </list>
     <ignored path="Foodeye.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -76,7 +66,7 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/NDBService.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="32" column="30" selection-start-line="32" selection-start-column="30" selection-end-line="32" selection-end-column="30" />
+              <caret line="38" column="45" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -97,14 +87,14 @@
       <file leaf-file-name="FullscreenActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/FullscreenActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.23191094">
-              <caret line="223" column="70" selection-start-line="223" selection-start-column="70" selection-end-line="223" selection-end-column="70" />
+            <state vertical-scroll-proportion="0.3320965">
+              <caret line="232" column="68" selection-start-line="232" selection-start-column="68" selection-end-line="232" selection-end-column="68" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#9945#10508#0" expanded="true" />
-                <element signature="e#10507#10508#0" expanded="true" />
-                <element signature="e#11319#11464#0" expanded="true" />
-                <element signature="e#11463#11464#0" expanded="true" />
+                <element signature="e#11048#11611#0" expanded="true" />
+                <element signature="e#11610#11611#0" expanded="true" />
+                <element signature="e#12422#12567#0" expanded="true" />
+                <element signature="e#12566#12567#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -2132,10 +2122,10 @@
           <caret line="149" column="99" selection-start-line="149" selection-start-column="99" selection-end-line="149" selection-end-column="99" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#9945#10508#0" expanded="true" />
-            <element signature="e#10507#10508#0" expanded="true" />
-            <element signature="e#11319#11464#0" expanded="true" />
-            <element signature="e#11463#11464#0" expanded="true" />
+            <element signature="e#11048#11611#0" expanded="true" />
+            <element signature="e#11610#11611#0" expanded="true" />
+            <element signature="e#12422#12567#0" expanded="true" />
+            <element signature="e#12566#12567#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2177,7 +2167,7 @@
     <entry file="file://$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/NDBService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="30" selection-start-line="32" selection-start-column="30" selection-end-line="32" selection-end-column="30" />
+          <caret line="38" column="45" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -2186,14 +2176,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/futurehack/org/foodeye/FullscreenActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23191094">
-          <caret line="223" column="70" selection-start-line="223" selection-start-column="70" selection-end-line="223" selection-end-column="70" />
+        <state vertical-scroll-proportion="0.3320965">
+          <caret line="232" column="68" selection-start-line="232" selection-start-column="68" selection-end-line="232" selection-end-column="68" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#9945#10508#0" expanded="true" />
-            <element signature="e#10507#10508#0" expanded="true" />
-            <element signature="e#11319#11464#0" expanded="true" />
-            <element signature="e#11463#11464#0" expanded="true" />
+            <element signature="e#11048#11611#0" expanded="true" />
+            <element signature="e#11610#11611#0" expanded="true" />
+            <element signature="e#12422#12567#0" expanded="true" />
+            <element signature="e#12566#12567#0" expanded="true" />
           </folding>
         </state>
       </provider>

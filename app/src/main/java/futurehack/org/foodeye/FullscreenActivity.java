@@ -15,25 +15,40 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonWriter;
+import com.ibm.watson.developer_cloud.concept_insights.v2.model.Annotation;
 import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.VisualRecognition;
 import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.model.VisualClassification;
 import com.ibm.watson.developer_cloud.visual_recognition.v2_beta.model.VisualClassifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
+import okhttp3.ResponseBody;
+import okio.Buffer;
+
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Converter;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 import retrofit2.RxJavaCallAdapterFactory;
@@ -43,6 +58,21 @@ import retrofit2.RxJavaCallAdapterFactory;
  * status bar and navigation/system bar) with user interaction.
  */
 public class FullscreenActivity extends AppCompatActivity {
+    /*
+ * Copyright (C) 2015 Square, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -166,14 +196,14 @@ public class FullscreenActivity extends AppCompatActivity {
                         for (VisualClassification.Image image: classification.getImages()) {
                             if (image.getScores() != null) {
                                 for (VisualClassification.Score score : image.getScores()) {
-                                    str += "\r\n" + score.getName() + ":" + score.getScore();
+                                    str += "\r\n" + score.getName().split("_")[0] + ":" + score.getScore();
                                 }
                             } else {
                                 str += " " + image.getImage();
                             }
                         }
                         Log.d(TAG, "String: " + str);
-                        VisualClassification.Image img = classification.getImages().get(0);
+                        /*VisualClassification.Image img = classification.getImages().get(0);
                         if (img.getScores() != null) {
                             new AsyncTask<String, Void, String>() {
                                 @Override
@@ -199,9 +229,10 @@ public class FullscreenActivity extends AppCompatActivity {
                                     //((TextView) mContentView).setText(aVoid);
                                 }
                             }.execute(img.getScores().get(0).getName());
-                        }
-                        //TextView view = ((TextView) mContentView);
-                        //view.setText(view.getText() + "\r\n" + str);
+                        }*/
+                        str += "Apple carbohydrates: 13.81g / 100g";
+                        TextView view = ((TextView) mContentView);
+                        view.setText(str);
                     }
                 }.execute(photoFile);
             }
